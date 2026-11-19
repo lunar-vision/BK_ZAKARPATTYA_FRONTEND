@@ -62,6 +62,7 @@ function copyDir(from, to, basePath = "") {
 
 	const excludePaths = new Set([
 		"dist",
+		"favicon.ico",
 		"js/build.js",
 		"scss",
 		"package.json",
