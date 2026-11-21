@@ -230,14 +230,17 @@ const revealElements = document.querySelectorAll(".reveal-y, .reveal-x");
 const reduceMotion = window.matchMedia(
   "(prefers-reduced-motion: reduce)",
 ).matches;
-const mobileRevealMedia = window.matchMedia("(max-width: 1439px)");
+const mobileRevealMedia = window.matchMedia("(max-width: 1279px)");
 
 function showReveal(element) {
   const delayValue =
     mobileRevealMedia.matches && element.dataset.delayMobile
       ? Number(element.dataset.delayMobile)
       : Number(element.dataset.delay);
-  const delay = Number.isFinite(delayValue) ? Math.max(0, delayValue * 100) : 0;
+  const delayOffset = mobileRevealMedia.matches ? 1 : 0;
+  const delay = Number.isFinite(delayValue)
+    ? Math.max(0, delayValue - delayOffset) * 100
+    : 0;
 
   window.setTimeout(() => element.classList.add("is-visible"), delay);
 }
