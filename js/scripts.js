@@ -255,11 +255,19 @@ if (reduceMotion || !("IntersectionObserver" in window)) {
         )
       : [],
   );
+  const mobilePricesRevealElements = new Set(
+    mobileRevealMedia.matches
+      ? document.querySelectorAll(
+          ".prices__note.reveal-y, .prices__cta.reveal-y",
+        )
+      : [],
+  );
   const earlyRevealElements = Array.from(revealElements).filter((el) =>
     lateDesktopServices.has(el),
   );
   const regularRevealElements = Array.from(revealElements).filter(
-    (el) => !lateDesktopServices.has(el),
+    (el) =>
+      !lateDesktopServices.has(el) && !mobilePricesRevealElements.has(el),
   );
 
   function observeReveal(elements, rootMargin) {
@@ -283,6 +291,10 @@ if (reduceMotion || !("IntersectionObserver" in window)) {
 
   observeReveal(regularRevealElements, "0px 0px 60px 0px");
   observeReveal(earlyRevealElements, "0px 0px 180px 0px");
+  observeReveal(
+    Array.from(mobilePricesRevealElements),
+    "0px 0px 100px 0px",
+  );
 }
 
 //burger-menu
