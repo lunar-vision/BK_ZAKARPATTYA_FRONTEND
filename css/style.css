@@ -1620,14 +1620,17 @@ img.is-loaded {
   }
 }
 @media (max-width: 1439px) {
-  .hero__header.reveal-x {
+  .hero__header .reveal-x {
     translate: 0 30px;
   }
-  .hero__header.reveal-x.is-visible {
+  .hero__header .reveal-x.is-visible {
     animation-name: reveal-y;
   }
   .hero .hero__container {
     margin-bottom: 120px;
+  }
+  .hero .hero__content > picture.reveal-from-right.is-visible {
+    animation-delay: 0.5s;
   }
   .hero .reveal-from-right {
     translate: 0 30px;
