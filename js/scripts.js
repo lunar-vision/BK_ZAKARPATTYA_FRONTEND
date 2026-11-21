@@ -71,6 +71,11 @@ window.initSwipers = function () {
   let restoreScrollBehavior = null;
   let scrollCompletion = null;
 
+  function finishProgrammaticScroll() {
+    document.documentElement.classList.remove("is-programmatic-scrolling");
+    window.dispatchEvent(new Event("programmatic-scroll-end"));
+  }
+
   function cleanUrl() {
     history.replaceState(
       null,
@@ -91,6 +96,7 @@ window.initSwipers = function () {
       cancelAnimationFrame(scrollRafId);
       scrollRafId = null;
       restoreNativeScrollBehavior();
+      finishProgrammaticScroll();
       const onComplete = scrollCompletion;
       scrollCompletion = null;
       onComplete?.();
@@ -140,6 +146,7 @@ window.initSwipers = function () {
       return;
     }
 
+    root.classList.add("is-programmatic-scrolling");
     scrollCompletion = onComplete;
     let startTime = null;
     const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
@@ -156,6 +163,7 @@ window.initSwipers = function () {
         el.scrollTop = getDestinationY();
         scrollRafId = null;
         restoreNativeScrollBehavior();
+        finishProgrammaticScroll();
         const completion = scrollCompletion;
         scrollCompletion = null;
         completion?.();
@@ -231,8 +239,33 @@ const reduceMotion = window.matchMedia(
   "(prefers-reduced-motion: reduce)",
 ).matches;
 const mobileRevealMedia = window.matchMedia("(max-width: 1279px)");
+const activeRevealObservers = [];
+const scheduledRevealElements = new WeakSet();
+
+window.addEventListener("programmatic-scroll-end", () => {
+  if (mobileRevealMedia.matches) {
+    document
+      .querySelectorAll(".prices__note.reveal-y, .prices__cta.reveal-y")
+      .forEach((element) => showReveal(element));
+  }
+
+  activeRevealObservers.forEach(({ observer, pendingElements }) => {
+    observer.takeRecords();
+    pendingElements.forEach((element) => {
+      observer.unobserve(element);
+      observer.observe(element);
+    });
+  });
+});
 
 function showReveal(element) {
+  if (
+    element.classList.contains("is-visible") ||
+    scheduledRevealElements.has(element)
+  ) {
+    return;
+  }
+
   const delayValue =
     mobileRevealMedia.matches && element.dataset.delayMobile
       ? Number(element.dataset.delayMobile)
@@ -242,6 +275,7 @@ function showReveal(element) {
     ? Math.max(0, delayValue - delayOffset) * 100
     : 0;
 
+  scheduledRevealElements.add(element);
   window.setTimeout(() => element.classList.add("is-visible"), delay);
 }
 
@@ -266,17 +300,28 @@ if (reduceMotion || !("IntersectionObserver" in window)) {
     lateDesktopServices.has(el),
   );
   const regularRevealElements = Array.from(revealElements).filter(
-    (el) =>
-      !lateDesktopServices.has(el) && !mobilePricesRevealElements.has(el),
+    (el) => !lateDesktopServices.has(el) && !mobilePricesRevealElements.has(el),
   );
 
   function observeReveal(elements, rootMargin) {
+    if (elements.length === 0) return;
+
+    const pendingElements = new Set(elements);
     const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            if (
+              document.documentElement.classList.contains(
+                "is-programmatic-scrolling",
+              )
+            ) {
+              return;
+            }
+
             showReveal(entry.target);
             revealObserver.unobserve(entry.target);
+            pendingElements.delete(entry.target);
           }
         });
       },
@@ -286,15 +331,16 @@ if (reduceMotion || !("IntersectionObserver" in window)) {
       },
     );
 
+    activeRevealObservers.push({
+      observer: revealObserver,
+      pendingElements,
+    });
     elements.forEach((el) => revealObserver.observe(el));
   }
 
   observeReveal(regularRevealElements, "0px 0px 60px 0px");
   observeReveal(earlyRevealElements, "0px 0px 180px 0px");
-  observeReveal(
-    Array.from(mobilePricesRevealElements),
-    "0px 0px 100px 0px",
-  );
+  observeReveal(Array.from(mobilePricesRevealElements), "0px 0px 100px 0px");
 }
 
 //burger-menu

@@ -1881,6 +1881,11 @@ img.is-loaded {
 }
 
 @media (max-width: 1279px) {
+  .reveal-y.is-visible,
+  .reveal-x.is-visible {
+    animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
   // Burger menu activation
   .header__burger {
     display: flex;
