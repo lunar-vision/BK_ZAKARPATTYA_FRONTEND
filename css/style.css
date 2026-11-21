@@ -1829,18 +1829,23 @@ img.is-loaded {
   .hero .hero__container .hero__features .hero__feature:last-of-type {
     left: initial;
     order: 4;
+    animation-delay: 0.4s;
   }
   .hero .hero__container .hero__features .hero__feature:first-of-type {
     order: 5;
+    animation-delay: 0.5s;
   }
   .hero .hero__container .hero__features .hero__feature:nth-of-type(2) {
     order: 2;
+    animation-delay: 0.2s;
   }
   .hero .hero__container .hero__features .hero__feature:nth-of-type(3) {
     order: 3;
+    animation-delay: 0.3s;
   }
   .hero .hero__container .hero__features .hero__feature:nth-of-type(4) {
     order: 1;
+    animation-delay: 0.1s;
   }
   .about .about__container .about__content .about__features .about__feature {
     display: flex;
