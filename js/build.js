@@ -11,324 +11,323 @@ const CSS_INPUT = "css/style.css";
 const CSS_OUTPUT = "dist/css/style.css";
 
 const whitelist = new Set([
-	"active",
-	"is-open",
-	"is-error",
-	"is-selected",
-	"is-placeholder",
-	"menu-open",
-	"reveal-y",
-	"reveal-x",
-	"is-visible",
-	"services__item",
-	"is-success",
-	"is-loaded",
-	"fonts-loaded",
+  "active",
+  "is-open",
+  "is-error",
+  "is-selected",
+  "is-placeholder",
+  "menu-open",
+  "reveal-y",
+  "reveal-x",
+  "is-visible",
+  "services__item",
+  "is-success",
+  "is-loaded",
+  "fonts-loaded",
 
-	"swiper",
-	"swiper-wrapper",
-	"swiper-slide",
-	"swiper-pagination",
-	"swiper-button-next",
-	"swiper-button-prev",
-	"swiper-pagination",
-	"swiper-pagination-bullet",
-	"swiper-pagination-bullet-active",
-	"swiper-slide-active",
-	"swiper-slide-next",
-	"swiper-slide-prev",
-	"swiper-button-disabled",
+  "swiper",
+  "swiper-wrapper",
+  "swiper-slide",
+  "swiper-pagination",
+  "swiper-button-next",
+  "swiper-button-prev",
+  "swiper-pagination",
+  "swiper-pagination-bullet",
+  "swiper-pagination-bullet-active",
+  "swiper-slide-active",
+  "swiper-slide-next",
+  "swiper-slide-prev",
+  "swiper-button-disabled",
 
-	"swiperGallery",
-	"swiperCertificates",
+  "swiperGallery",
+  "swiperCertificates",
 
-	"header__logo",
-	"header__burger",
-	"header__nav",
-	"header__overlay",
+  "header__logo",
+  "header__burger",
+  "header__nav",
+  "header__overlay",
 
-	"contacts__map",
+  "contacts__map",
 ]);
 
 function ensureDir(dir) {
-	fs.mkdirSync(dir, { recursive: true });
+  fs.mkdirSync(dir, { recursive: true });
 }
 
 function cleanDist() {
-	fs.rmSync(DIST_DIR, { recursive: true, force: true });
-	ensureDir(DIST_DIR);
-	ensureDir(path.dirname(CSS_OUTPUT));
+  fs.rmSync(DIST_DIR, { recursive: true, force: true });
+  ensureDir(DIST_DIR);
+  ensureDir(path.dirname(CSS_OUTPUT));
 }
 
 function copyDir(from, to, basePath = "") {
-	if (!fs.existsSync(from)) return;
+  if (!fs.existsSync(from)) return;
 
-	const excludePaths = new Set([
-		"dist",
-		"js/build.js",
-		"scss",
-		"package.json",
-		"package-lock.json",
-		"node_modules",
-		".git",
-		".gitignore",
-		".github",
-		".htmlvalidate.json",
-		"class-map.json",
-		"css/style.css"
+  const excludePaths = new Set([
+    "dist",
+    "js/build.js",
+    "scss",
+    "package.json",
+    "package-lock.json",
+    "node_modules",
+    ".git",
+    ".gitignore",
+    ".github",
+    ".htmlvalidate.json",
+    "class-map.json",
+    "css/style.css",
+    "0_to_do.txt",
+  ]);
 
-	]);
+  function shouldCopy(relPath) {
+    if (excludePaths.has(relPath)) return false;
+    if (relPath.endsWith(".scss")) return false;
+    if (relPath.endsWith(".html")) return false;
+    return true;
+  }
 
-	function shouldCopy(relPath) {
-		if (excludePaths.has(relPath)) return false;
-		if (relPath.endsWith(".scss")) return false;
-		if (relPath.endsWith(".html")) return false;
-		return true;
-	}
+  function copyRecursive(src, dst, rel) {
+    ensureDir(dst);
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+      const relPath = rel ? rel + "/" + entry.name : entry.name;
+      const srcPath = path.join(src, entry.name);
+      const dstPath = path.join(dst, entry.name);
+      if (!shouldCopy(relPath)) continue;
+      if (entry.isDirectory()) {
+        copyRecursive(srcPath, dstPath, relPath);
+      } else {
+        fs.copyFileSync(srcPath, dstPath);
+      }
+    }
+  }
 
-	function copyRecursive(src, dst, rel) {
-		ensureDir(dst);
-		const entries = fs.readdirSync(src, { withFileTypes: true });
-		for (const entry of entries) {
-			const relPath = rel ? rel + "/" + entry.name : entry.name;
-			const srcPath = path.join(src, entry.name);
-			const dstPath = path.join(dst, entry.name);
-			if (!shouldCopy(relPath)) continue;
-			if (entry.isDirectory()) {
-				copyRecursive(srcPath, dstPath, relPath);
-			} else {
-				fs.copyFileSync(srcPath, dstPath);
-			}
-		}
-	}
-
-	copyRecursive(from, to, basePath);
+  copyRecursive(from, to, basePath);
 }
 
 function copyFile(from, to) {
-	if (!fs.existsSync(from)) return;
+  if (!fs.existsSync(from)) return;
 
-	ensureDir(path.dirname(to));
-	fs.copyFileSync(from, to);
+  ensureDir(path.dirname(to));
+  fs.copyFileSync(from, to);
 }
 
 function generateName(index) {
-	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	let name = "";
-	let num = index;
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let name = "";
+  let num = index;
 
-	do {
-		name = chars[num % chars.length] + name;
-		num = Math.floor(num / chars.length) - 1;
-	} while (num >= 0);
+  do {
+    name = chars[num % chars.length] + name;
+    num = Math.floor(num / chars.length) - 1;
+  } while (num >= 0);
 
-	return "_" + name;
+  return "_" + name;
 }
 
 function escapeRegExp(value) {
-	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function extractClassesFromCss(css) {
-	const classRegex = /\.([a-zA-Z_-][a-zA-Z0-9_-]*)/g;
-	const classes = new Set();
+  const classRegex = /\.([a-zA-Z_-][a-zA-Z0-9_-]*)/g;
+  const classes = new Set();
 
-	let match;
+  let match;
 
-	while ((match = classRegex.exec(css)) !== null) {
-		const className = match[1];
+  while ((match = classRegex.exec(css)) !== null) {
+    const className = match[1];
 
-		if (!whitelist.has(className)) {
-			classes.add(className);
-		}
-	}
+    if (!whitelist.has(className)) {
+      classes.add(className);
+    }
+  }
 
-	return classes;
+  return classes;
 }
 
 function extractClassesFromHtml(html) {
-	const classAttributeRegex = /class="([^"]*)"/g;
-	const classes = new Set();
+  const classAttributeRegex = /class="([^"]*)"/g;
+  const classes = new Set();
 
-	let match;
+  let match;
 
-	while ((match = classAttributeRegex.exec(html)) !== null) {
-		const classValue = match[1];
+  while ((match = classAttributeRegex.exec(html)) !== null) {
+    const classValue = match[1];
 
-		classValue
-			.split(/\s+/)
-			.filter(Boolean)
-			.forEach((className) => {
-				if (!whitelist.has(className)) {
-					classes.add(className);
-				}
-			});
-	}
+    classValue
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach((className) => {
+        if (!whitelist.has(className)) {
+          classes.add(className);
+        }
+      });
+  }
 
-	return classes;
+  return classes;
 }
 
 function replaceClassesInCss(css, classMap) {
-	let result = css;
+  let result = css;
 
-	for (const [original, obfuscated] of Object.entries(classMap)) {
-		const regex = new RegExp(`\\.(${escapeRegExp(original)})(?![\\w-])`, "g");
-		result = result.replace(regex, `.${obfuscated}`);
-	}
+  for (const [original, obfuscated] of Object.entries(classMap)) {
+    const regex = new RegExp(`\\.(${escapeRegExp(original)})(?![\\w-])`, "g");
+    result = result.replace(regex, `.${obfuscated}`);
+  }
 
-	return result;
+  return result;
 }
 
 function replaceClassesInHtml(html, classMap) {
-	return html.replace(/class="([^"]*)"/g, (fullMatch, classValue) => {
-		const newClassValue = classValue
-			.split(/\s+/)
-			.filter(Boolean)
-			.map((className) => classMap[className] || className)
-			.join(" ");
+  return html.replace(/class="([^"]*)"/g, (fullMatch, classValue) => {
+    const newClassValue = classValue
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((className) => classMap[className] || className)
+      .join(" ");
 
-		return `class="${newClassValue}"`;
-	});
+    return `class="${newClassValue}"`;
+  });
 }
 
 function removeCssSourceMapComment(css) {
-	return css.replace(/\/\*# sourceMappingURL=.*?\*\//g, "");
+  return css.replace(/\/\*# sourceMappingURL=.*?\*\//g, "");
 }
 
 async function build() {
-	cleanDist();
+  cleanDist();
 
-	if (!fs.existsSync(CSS_INPUT)) {
-		throw new Error(`CSS file not found: ${CSS_INPUT}`);
-	}
+  if (!fs.existsSync(CSS_INPUT)) {
+    throw new Error(`CSS file not found: ${CSS_INPUT}`);
+  }
 
-	let originalCss = fs.readFileSync(CSS_INPUT, "utf8");
-	originalCss = removeCssSourceMapComment(originalCss);
+  let originalCss = fs.readFileSync(CSS_INPUT, "utf8");
+  originalCss = removeCssSourceMapComment(originalCss);
 
-	const cssWithoutUrlsForExtract = protectCssUrls(originalCss).css;
+  const cssWithoutUrlsForExtract = protectCssUrls(originalCss).css;
 
-	const htmlFiles = globSync("*.html");
+  const htmlFiles = globSync("*.html");
 
-	const allClasses = new Set();
+  const allClasses = new Set();
 
-	extractClassesFromCss(cssWithoutUrlsForExtract).forEach((className) => {
-		allClasses.add(className);
-	});
+  extractClassesFromCss(cssWithoutUrlsForExtract).forEach((className) => {
+    allClasses.add(className);
+  });
 
-	for (const htmlFile of htmlFiles) {
-		const html = fs.readFileSync(htmlFile, "utf8");
+  for (const htmlFile of htmlFiles) {
+    const html = fs.readFileSync(htmlFile, "utf8");
 
-		extractClassesFromHtml(html).forEach((className) => {
-			allClasses.add(className);
-		});
-	}
+    extractClassesFromHtml(html).forEach((className) => {
+      allClasses.add(className);
+    });
+  }
 
-	const classes = [...allClasses];
+  const classes = [...allClasses];
 
-	const classMap = {};
+  const classMap = {};
 
-	classes.forEach((className, index) => {
-		classMap[className] = generateName(index);
-	});
+  classes.forEach((className, index) => {
+    classMap[className] = generateName(index);
+  });
 
-	const protectedCssResult = protectCssUrls(originalCss);
+  const protectedCssResult = protectCssUrls(originalCss);
 
-	const obfuscatedProtectedCss = replaceClassesInCss(
-		protectedCssResult.css,
-		classMap,
-	);
+  const obfuscatedProtectedCss = replaceClassesInCss(
+    protectedCssResult.css,
+    classMap,
+  );
 
-	const obfuscatedCss = restoreCssUrls(
-		obfuscatedProtectedCss,
-		protectedCssResult.urls,
-	);
+  const obfuscatedCss = restoreCssUrls(
+    obfuscatedProtectedCss,
+    protectedCssResult.urls,
+  );
 
-	const minifiedCssResult = new CleanCSS({
-		level: 2,
-	}).minify(obfuscatedCss);
+  const minifiedCssResult = new CleanCSS({
+    level: 2,
+  }).minify(obfuscatedCss);
 
-	if (minifiedCssResult.errors.length > 0) {
-		console.error(minifiedCssResult.errors);
-		throw new Error("CSS minification failed");
-	}
+  if (minifiedCssResult.errors.length > 0) {
+    console.error(minifiedCssResult.errors);
+    throw new Error("CSS minification failed");
+  }
 
-	fs.writeFileSync(CSS_OUTPUT, minifiedCssResult.styles);
+  fs.writeFileSync(CSS_OUTPUT, minifiedCssResult.styles);
 
-	for (const htmlFile of htmlFiles) {
-		const html = fs.readFileSync(htmlFile, "utf8");
+  for (const htmlFile of htmlFiles) {
+    const html = fs.readFileSync(htmlFile, "utf8");
 
-		let result = replaceClassesInHtml(html, classMap);
+    let result = replaceClassesInHtml(html, classMap);
 
+    result = result.replace(
+      /<style>([\s\S]*?)<\/style>/g,
+      (match, cssContent) => {
+        const protectedCss = protectCssUrls(cssContent);
+        const obfuscatedCss = replaceClassesInCss(protectedCss.css, classMap);
+        const restoredCss = restoreCssUrls(obfuscatedCss, protectedCss.urls);
+        return `<style>${new CleanCSS({ level: 2 }).minify(restoredCss).styles}</style>`;
+      },
+    );
 
-		result = result.replace(/<style>([\s\S]*?)<\/style>/g, (match, cssContent) => {
-			const protectedCss = protectCssUrls(cssContent);
-			const obfuscatedCss = replaceClassesInCss(protectedCss.css, classMap);
-			const restoredCss = restoreCssUrls(obfuscatedCss, protectedCss.urls);
-			return `<style>${new CleanCSS({ level: 2 }).minify(restoredCss).styles}</style>`;
-		});
+    result = await minify(result, {
+      collapseWhitespace: true,
+      removeComments: true,
+      minifyCSS: false,
+      minifyJS: true,
+      collapseBooleanAttributes: false,
+      removeAttributeQuotes: false,
+    });
 
-		result = await minify(result, {
-			collapseWhitespace: true,
-			removeComments: true,
-			minifyCSS: false,
-			minifyJS: true,
-			collapseBooleanAttributes: false,
-			removeAttributeQuotes: false,
-		});
+    fs.writeFileSync(path.join(DIST_DIR, htmlFile), result);
+  }
 
-		fs.writeFileSync(path.join(DIST_DIR, htmlFile), result);
-	}
+  copyDir(".", DIST_DIR, "");
 
-	copyDir(".", DIST_DIR, "");
+  const jsFiles = globSync("js/**/*.js").filter(
+    (file) => !file.endsWith(".min.js") && !file.includes("build.js"),
+  );
 
-	const jsFiles = globSync("js/**/*.js").filter(
-		(file) => !file.endsWith(".min.js") && !file.includes("build.js"),
-	);
+  for (const jsFile of jsFiles) {
+    const code = fs.readFileSync(jsFile, "utf8");
+    const result = await minifyJs(code, {
+      compress: true,
+      mangle: {
+        reserved: ["toggleMenu", "closeMenu", "hideFormToast", "gtag"],
+      },
+    });
+    fs.writeFileSync(path.join(DIST_DIR, jsFile), result.code);
+  }
 
-	for (const jsFile of jsFiles) {
-		const code = fs.readFileSync(jsFile, "utf8");
-		const result = await minifyJs(code, {
-			compress: true,
-			mangle: {
-				reserved: ["toggleMenu", "closeMenu", "hideFormToast", "gtag"],
-			},
-		});
-		fs.writeFileSync(path.join(DIST_DIR, jsFile), result.code);
-	}
+  // class-map.json создаётся в корне проекта, а НЕ в dist
+  fs.writeFileSync("class-map.json", JSON.stringify(classMap, null, 2));
 
-	// class-map.json создаётся в корне проекта, а НЕ в dist
-	fs.writeFileSync(
-		"class-map.json",
-		JSON.stringify(classMap, null, 2),
-	);
-
-	console.log("Build complete.");
-	console.log(`Classes obfuscated: ${Object.keys(classMap).length}`);
+  console.log("Build complete.");
+  console.log(`Classes obfuscated: ${Object.keys(classMap).length}`);
 }
 
 function protectCssUrls(css) {
-	const urls = [];
+  const urls = [];
 
-	const protectedCss = css.replace(/url\(([^)]*)\)/g, (match) => {
-		const placeholder = `___CSS_URL_${urls.length}___`;
-		urls.push(match);
-		return placeholder;
-	});
+  const protectedCss = css.replace(/url\(([^)]*)\)/g, (match) => {
+    const placeholder = `___CSS_URL_${urls.length}___`;
+    urls.push(match);
+    return placeholder;
+  });
 
-	return {
-		css: protectedCss,
-		urls,
-	};
+  return {
+    css: protectedCss,
+    urls,
+  };
 }
 
 function restoreCssUrls(css, urls) {
-	let result = css;
+  let result = css;
 
-	urls.forEach((url, index) => {
-		result = result.replace(`___CSS_URL_${index}___`, url);
-	});
+  urls.forEach((url, index) => {
+    result = result.replace(`___CSS_URL_${index}___`, url);
+  });
 
-	return result;
+  return result;
 }
 
 build();
