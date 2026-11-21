@@ -1636,6 +1636,9 @@ img.is-loaded {
   .reveal-x.is-visible {
     animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   }
+  .prices__cta.is-visible {
+    animation-delay: 500ms;
+  }
   .header__burger {
     display: flex;
   }

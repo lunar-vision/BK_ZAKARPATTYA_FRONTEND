@@ -142,6 +142,7 @@ window.initSwipers = function () {
     if (Math.abs(diff) < 1) {
       el.scrollTop = getDestinationY();
       restoreNativeScrollBehavior();
+      finishProgrammaticScroll();
       onComplete?.();
       return;
     }
