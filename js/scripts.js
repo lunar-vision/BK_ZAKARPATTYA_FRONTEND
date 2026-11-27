@@ -41,7 +41,7 @@ window.initSwipers = function () {
         1600: {
           slidesPerView: 3,
         },
-        1920: {
+        1904: {
           slidesPerView: 4,
         },
       },

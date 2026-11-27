@@ -870,6 +870,7 @@ header {
         .certificates__item {
           &.swiper-slide {
             border: 3px solid $main_color;
+            width: 355px;
           }
 
           .certificates__link {

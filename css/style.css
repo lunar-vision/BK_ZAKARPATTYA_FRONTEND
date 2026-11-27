@@ -770,6 +770,7 @@ header .header__container .header__list .header__item .header__item-link:hover {
 }
 .certificates .certificates__container .swiperCertificates .certificates__list .certificates__item.swiper-slide {
   border: 3px solid #38393e;
+  width: 355px;
 }
 .certificates .certificates__container .swiperCertificates .certificates__list .certificates__item .certificates__link .certificates__item-img {
   max-width: 349px;
